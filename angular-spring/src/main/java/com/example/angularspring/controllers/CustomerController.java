@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
@@ -42,5 +43,31 @@ public class CustomerController {
         customerRepository.deleteById(id);
 
         return new ResponseEntity<>("customer has beend deleted", HttpStatus.OK);
+    }
+
+    @GetMapping(value = "customers/age/{age}")
+    public List<Customer> findByAge(@PathVariable int age) {
+
+        List<Customer> customers = customerRepository.findByAge(age);
+        return customers;
+    }
+
+    @PutMapping("/customers/{id}")
+    public ResponseEntity<Customer> updateCustomer(@PathVariable("id") long id,
+                                                   @RequestBody Customer customer) {
+        System.out.println("update custoemr with id "+ id);
+        Optional<Customer> customerData = customerRepository.findById(id);
+
+        if (customerData.isPresent()) {
+            Customer _customer = customerData.get();
+            _customer.setName(customer.getName());
+            _customer.setAge(customer.getAge());
+            _customer.setActive(customer.isActive());
+
+            return new ResponseEntity<>(customerRepository.save(_customer),
+                    HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 }
